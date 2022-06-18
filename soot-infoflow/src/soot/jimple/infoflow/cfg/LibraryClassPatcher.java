@@ -2,20 +2,8 @@ package soot.jimple.infoflow.cfg;
 
 import java.util.Collections;
 
-import soot.Body;
-import soot.IntType;
-import soot.Local;
-import soot.Modifier;
-import soot.RefType;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootField;
-import soot.SootFieldRef;
-import soot.SootMethod;
-import soot.Type;
-import soot.Unit;
-import soot.VoidType;
-import soot.javaToJimple.LocalGenerator;
+import soot.*;
+import soot.javaToJimple.DefaultLocalGenerator;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
@@ -226,7 +214,7 @@ public class LibraryClassPatcher {
 		// message mocking
 		SootMethod smMessageConstructor = Scene.v().grabMethod("<android.os.Message: void <init>()>");
 
-		LocalGenerator lg = new LocalGenerator(body);
+		LocalGenerator lg = new DefaultLocalGenerator(body);
 		Local messageLocal = lg.generateLocal(tpMessage);
 		body.getUnits().add(Jimple.v().newAssignStmt(messageLocal, Jimple.v().newNewExpr(tpMessage)));
 		body.getUnits().add(Jimple.v()

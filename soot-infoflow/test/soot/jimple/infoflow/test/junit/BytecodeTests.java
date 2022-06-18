@@ -6,16 +6,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import soot.Body;
-import soot.Local;
-import soot.Modifier;
-import soot.RefType;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Type;
-import soot.VoidType;
-import soot.javaToJimple.LocalGenerator;
+import soot.*;
+import soot.javaToJimple.DefaultLocalGenerator;
 import soot.jimple.Jimple;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.IInfoflow;
@@ -119,7 +111,7 @@ public class BytecodeTests extends JUnitTests {
 		
 		Body bOnCreate = Jimple.v().newBody(smOnCreate);
 		smOnCreate.setActiveBody(bOnCreate);
-		LocalGenerator localGenOnCreate = new LocalGenerator(bOnCreate);
+		LocalGenerator localGenOnCreate = new DefaultLocalGenerator(bOnCreate);
 		
 		Local thisOnCreate = localGenOnCreate.generateLocal(testClass.getType());
 		Local param0onCreate = localGenOnCreate.generateLocal(containerType);
@@ -134,7 +126,7 @@ public class BytecodeTests extends JUnitTests {
 
 		Body bTarget = Jimple.v().newBody(smTarget);
 		smTarget.setActiveBody(bTarget);
-		LocalGenerator localGenTarget = new LocalGenerator(bTarget);
+		LocalGenerator localGenTarget = new DefaultLocalGenerator(bTarget);
 
 		Local thisTarget = localGenTarget.generateLocal(testClass.getType());
 		Local param0Target = localGenTarget.generateLocal(containerType);
@@ -161,7 +153,7 @@ public class BytecodeTests extends JUnitTests {
 		SootMethod smEntryPoint = Scene.v().getMethod("<soot.jimple.infoflow.test.junit.BytecodeTests: void dummy()>");
 		Body bEntryPoint = smEntryPoint.retrieveActiveBody();
 		
-		LocalGenerator localGenEntryPoint = new LocalGenerator(bEntryPoint);
+		LocalGenerator localGenEntryPoint = new DefaultLocalGenerator(bEntryPoint);
 		Local containerEntryPoint = localGenEntryPoint.generateLocal(containerType);
 		
 		bEntryPoint.getUnits().insertBefore(Jimple.v().newAssignStmt(containerEntryPoint,

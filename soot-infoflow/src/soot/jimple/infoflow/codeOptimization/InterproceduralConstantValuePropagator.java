@@ -15,28 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import heros.solver.Pair;
-import soot.Body;
-import soot.DoubleType;
-import soot.FloatType;
-import soot.IntType;
-import soot.Local;
-import soot.LongType;
-import soot.MethodOrMethodContext;
-import soot.Modifier;
-import soot.RefType;
-import soot.Scene;
-import soot.SceneTransformer;
-import soot.SootClass;
-import soot.SootField;
-import soot.SootMethod;
-import soot.Trap;
-import soot.Type;
-import soot.Unit;
-import soot.Value;
-import soot.ValueBox;
-import soot.VoidType;
+import soot.*;
 import soot.dexpler.DalvikThrowAnalysis;
-import soot.javaToJimple.LocalGenerator;
+import soot.javaToJimple.DefaultLocalGenerator;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -505,7 +486,7 @@ public class InterproceduralConstantValuePropagator extends SceneTransformer {
 
 						@Override
 						protected SootMethod createDummyMainInternal() {
-							LocalGenerator generator = new LocalGenerator(body);
+							LocalGenerator generator = new DefaultLocalGenerator(body);
 
 							// Create the counter used for the opaque predicate
 							int conditionCounter = 0;

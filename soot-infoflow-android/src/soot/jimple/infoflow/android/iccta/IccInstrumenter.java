@@ -9,13 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soot.Body;
-import soot.Local;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
-import soot.javaToJimple.LocalGenerator;
+import soot.*;
+import soot.javaToJimple.DefaultLocalGenerator;
 import soot.jimple.Jimple;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.android.entryPointCreators.components.ComponentEntryPointCollection;
@@ -109,7 +104,7 @@ public class IccInstrumenter implements PreAnalysisHandler {
 			for (SootMethod sootMethod : methodCopyList) {
 				if (sootMethod.isConcrete()) {
 					final Body body = sootMethod.retrieveActiveBody();
-					final LocalGenerator lg = new LocalGenerator(body);
+					final LocalGenerator lg = new DefaultLocalGenerator(body);
 
 					// Mark the method as processed
 					if (!processedMethods.add(sootMethod))

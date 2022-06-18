@@ -25,27 +25,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soot.ArrayType;
-import soot.Body;
-import soot.BooleanType;
-import soot.ByteType;
-import soot.CharType;
-import soot.DoubleType;
-import soot.FloatType;
-import soot.IntType;
-import soot.Local;
-import soot.LongType;
-import soot.PrimType;
-import soot.RefType;
-import soot.Scene;
-import soot.ShortType;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Type;
-import soot.Unit;
-import soot.Value;
-import soot.VoidType;
-import soot.javaToJimple.LocalGenerator;
+import soot.*;
+import soot.javaToJimple.DefaultLocalGenerator;
 import soot.jimple.AssignStmt;
 import soot.jimple.DoubleConstant;
 import soot.jimple.EqExpr;
@@ -143,7 +124,7 @@ public abstract class BaseEntryPointCreator implements IEntryPointCreator {
 
 		// We provide some helper objects
 		final Body body = mainMethod.getActiveBody();
-		generator = new LocalGenerator(body);
+		generator = new DefaultLocalGenerator(body);
 
 		// Make sure that we have an opaque predicate
 		conditionCounter = 0;
@@ -221,7 +202,7 @@ public abstract class BaseEntryPointCreator implements IEntryPointCreator {
 		mainMethod.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
 
 		// Add a parameter reference to the body
-		LocalGenerator lg = new LocalGenerator(body);
+		LocalGenerator lg = new DefaultLocalGenerator(body);
 		Local paramLocal = lg.generateLocal(stringArrayType);
 		body.getUnits()
 				.addFirst(Jimple.v().newIdentityStmt(paramLocal, Jimple.v().newParameterRef(stringArrayType, 0)));
