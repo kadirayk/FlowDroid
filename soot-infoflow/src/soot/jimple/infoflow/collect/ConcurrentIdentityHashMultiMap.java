@@ -18,10 +18,7 @@
  */
 
 package soot.jimple.infoflow.collect;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -89,13 +86,13 @@ public class ConcurrentIdentityHashMultiMap<K,V> extends AbstractMultiMap<K, V> 
     public boolean put( K key, V value ) {
         return findSet( key ).put( value, value ) == null;
     }
-    
+
     public V putIfAbsent( K key, V value ) {
         return findSet( key ).putIfAbsent( value, value );
     }
     
     @Override
-    public boolean putAll( K key, Set<V> values ) {
+    public boolean putAll(K key, Collection<V> values) {
         if (values.isEmpty()) return false;
         
         Map<V,V> set = findSet( key );
@@ -124,7 +121,7 @@ public class ConcurrentIdentityHashMultiMap<K,V> extends AbstractMultiMap<K, V> 
     }
 
     @Override
-    public boolean removeAll( K key, Set<V> values ) {
+    public boolean removeAll( K key, Collection<V> values ) {
         Map<V,V> s = m.get( key );
         if( s == null ) return false;
         boolean ret = false;
