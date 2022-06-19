@@ -21,6 +21,7 @@ import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
 
@@ -140,6 +141,11 @@ public class DefaultBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
         SparseAliasManager aliasManager = SparseAliasManager.getInstance(SparseCFGCache.SparsificationStrategy.NONE);
         // Query for the base variable
         Set<AccessPath> aliases = aliasManager.getAliases(src, method, base);
+
+        //remove the redundant query value from aliases
+        aliases = aliases.stream().filter(a -> !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) a.getBase()).getDelegate())).collect(Collectors.toSet());
+
+
         SootField[] fields = newAbs.getAccessPath().getFields();
         // append the fields the incoming access path had to the result set
         Set<AccessPath> aliasesWitFields = new HashSet<>();
