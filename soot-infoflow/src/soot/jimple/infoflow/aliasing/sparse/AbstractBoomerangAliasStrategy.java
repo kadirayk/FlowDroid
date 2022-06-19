@@ -23,24 +23,26 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DefaultBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
+public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
 
-    private final IInfoflowCFG icfg;
+    private IInfoflowCFG icfg;
     private IInfoflowCFG bwicfg;
     private LinkedList<String> methodIgnoreList;
 
     private Multimap<Pair<SootMethod, Abstraction>, Pair<Unit, Abstraction>> incomingMap =
             HashMultimap.create();
 
-    public DefaultBoomerangAliasStrategy(InfoflowManager manager) {
+    public AbstractBoomerangAliasStrategy(InfoflowManager manager) {
         super(manager);
         this.icfg = manager.getICFG();
         this.bwicfg = new BackwardsInfoflowCFG(this.icfg);
 
         methodIgnoreList = new LinkedList<String>();
-        //methodIgnoreList.add("int hashCode()");
-        //methodIgnoreList.add("boolean equals(java.lang.Object)");
+        methodIgnoreList.add("int hashCode()");
+        methodIgnoreList.add("boolean equals(java.lang.Object)");
     }
+
+    protected abstract SparseAliasManager getSparseAliasManager();
 
 
     private boolean isIgnoredMethod(SootMethod m) {
@@ -138,7 +140,7 @@ public class DefaultBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
         if (base == null)
             return;
         SootMethod method = icfg.getMethodOf(src);
-        SparseAliasManager aliasManager = SparseAliasManager.getInstance(SparseCFGCache.SparsificationStrategy.NONE);
+        SparseAliasManager aliasManager = getSparseAliasManager();
         // Query for the base variable
         Set<AccessPath> aliases = aliasManager.getAliases(src, method, base);
 

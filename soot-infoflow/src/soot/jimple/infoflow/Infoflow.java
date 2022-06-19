@@ -47,6 +47,7 @@ import soot.jimple.infoflow.aliasing.LazyAliasingStrategy;
 import soot.jimple.infoflow.aliasing.NullAliasStrategy;
 import soot.jimple.infoflow.aliasing.PtsBasedAliasStrategy;
 import soot.jimple.infoflow.aliasing.sparse.DefaultBoomerangAliasStrategy;
+import soot.jimple.infoflow.aliasing.sparse.TypeBasedSparseBoomerangAliasStrategy;
 import soot.jimple.infoflow.cfg.BiDirICFGFactory;
 import soot.jimple.infoflow.codeOptimization.DeadCodeEliminator;
 import soot.jimple.infoflow.codeOptimization.ICodeOptimizer;
@@ -312,7 +313,7 @@ public class Infoflow extends AbstractInfoflow {
 			if (pathBuilderFactory == null)
 				pathBuilderFactory = new DefaultPathBuilderFactory(config.getPathConfiguration());
 
-			if(config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang){
+			if(isBoomerangActive()){
 				// Must have for Boomerang
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
@@ -968,6 +969,11 @@ public class Infoflow extends AbstractInfoflow {
 			backSolver = null;
 			aliasingStrategy = new DefaultBoomerangAliasStrategy(manager);
 			break;
+		case TypeBasedSparseBoomerang:
+			backProblem = null;
+			backSolver = null;
+			aliasingStrategy = new TypeBasedSparseBoomerangAliasStrategy(manager);
+			break;
 		default:
 			throw new RuntimeException("Unsupported aliasing algorithm");
 		}
@@ -1231,6 +1237,11 @@ public class Infoflow extends AbstractInfoflow {
 
 		}
 		return sinkCount;
+	}
+
+	private boolean isBoomerangActive(){
+		return config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang
+				|| config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.TypeBasedSparseBoomerang;
 	}
 
 	@Override
