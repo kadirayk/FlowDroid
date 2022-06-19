@@ -289,7 +289,7 @@ public class Infoflow extends AbstractInfoflow {
 				sourcesSinks.initialize();
 
 			// Perform constant propagation and remove dead code
-			if (config.getCodeEliminationMode() != CodeEliminationMode.NoCodeElimination) {
+			if (false && config.getCodeEliminationMode() != CodeEliminationMode.NoCodeElimination) {
 				long currentMillis = System.nanoTime();
 				eliminateDeadCode(sourcesSinks);
 				logger.info("Dead code elimination took " + (System.nanoTime() - currentMillis) / 1E9 + " seconds");
@@ -312,14 +312,17 @@ public class Infoflow extends AbstractInfoflow {
 			if (pathBuilderFactory == null)
 				pathBuilderFactory = new DefaultPathBuilderFactory(config.getPathConfiguration());
 
+			if(config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang){
+				// Must have for Boomerang
+				BoomerangPretransformer.v().reset();
+				BoomerangPretransformer.v().apply();
+				releaseCallgraph();
+				constructCallgraph();
+			}
 			logger.info("Starting Taint Analysis");
 			IInfoflowCFG iCfg = icfgFactory.buildBiDirICFG(config.getCallgraphAlgorithm(),
 					config.getEnableExceptionTracking());
-			if(config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang){
-				// Must have for Boomerang
-				//BoomerangPretransformer.v().reset();
-				BoomerangPretransformer.v().apply();
-			}
+
 
 			// Check whether we need to run with one source at a time
 			IOneSourceAtATimeManager oneSourceAtATime = config.getOneSourceAtATime() && sourcesSinks != null
