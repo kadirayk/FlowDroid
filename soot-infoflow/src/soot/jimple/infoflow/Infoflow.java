@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import boomerang.scene.jimple.BoomerangPretransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ import soot.jimple.infoflow.aliasing.IAliasingStrategy;
 import soot.jimple.infoflow.aliasing.LazyAliasingStrategy;
 import soot.jimple.infoflow.aliasing.NullAliasStrategy;
 import soot.jimple.infoflow.aliasing.PtsBasedAliasStrategy;
+import soot.jimple.infoflow.aliasing.sparse.DefaultBoomerangAliasStrategy;
 import soot.jimple.infoflow.cfg.BiDirICFGFactory;
 import soot.jimple.infoflow.codeOptimization.DeadCodeEliminator;
 import soot.jimple.infoflow.codeOptimization.ICodeOptimizer;
@@ -313,6 +315,11 @@ public class Infoflow extends AbstractInfoflow {
 			logger.info("Starting Taint Analysis");
 			IInfoflowCFG iCfg = icfgFactory.buildBiDirICFG(config.getCallgraphAlgorithm(),
 					config.getEnableExceptionTracking());
+			if(config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang){
+				// Must have for Boomerang
+				//BoomerangPretransformer.v().reset();
+				BoomerangPretransformer.v().apply();
+			}
 
 			// Check whether we need to run with one source at a time
 			IOneSourceAtATimeManager oneSourceAtATime = config.getOneSourceAtATime() && sourcesSinks != null
@@ -952,6 +959,11 @@ public class Infoflow extends AbstractInfoflow {
 			backProblem = null;
 			backSolver = null;
 			aliasingStrategy = new LazyAliasingStrategy(manager);
+			break;
+		case Boomerang:
+			backProblem = null;
+			backSolver = null;
+			aliasingStrategy = new DefaultBoomerangAliasStrategy(manager);
 			break;
 		default:
 			throw new RuntimeException("Unsupported aliasing algorithm");

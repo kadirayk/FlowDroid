@@ -585,6 +585,8 @@ public class MainClass {
 			return AliasingAlgorithm.PtsBased;
 		else if (aliasAlgo.equalsIgnoreCase("LAZY"))
 			return AliasingAlgorithm.Lazy;
+		else if (aliasAlgo.equalsIgnoreCase("BOOMERANG"))
+			return AliasingAlgorithm.Boomerang;
 		else {
 			System.err.println(String.format("Invalid aliasing algorithm: %s", aliasAlgo));
 			throw new AbortAnalysisException();
