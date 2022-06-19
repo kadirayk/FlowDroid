@@ -289,7 +289,7 @@ public class Infoflow extends AbstractInfoflow {
 				sourcesSinks.initialize();
 
 			// Perform constant propagation and remove dead code
-			if (false && config.getCodeEliminationMode() != CodeEliminationMode.NoCodeElimination) {
+			if (config.getCodeEliminationMode() != CodeEliminationMode.NoCodeElimination) {
 				long currentMillis = System.nanoTime();
 				eliminateDeadCode(sourcesSinks);
 				logger.info("Dead code elimination took " + (System.nanoTime() - currentMillis) / 1E9 + " seconds");
