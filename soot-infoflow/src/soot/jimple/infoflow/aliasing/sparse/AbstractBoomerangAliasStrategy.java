@@ -145,7 +145,7 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         Set<AccessPath> aliases = aliasManager.getAliases(src, method, base);
 
         //remove the redundant query value from aliases
-        aliases = aliases.stream().filter(a -> !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) a.getBase()).getDelegate())).collect(Collectors.toSet());
+        aliases = aliases.stream().filter(a -> (a.getBase() instanceof JimpleVal) && !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) a.getBase()).getDelegate())).collect(Collectors.toSet());
 
 
         SootField[] fields = newAbs.getAccessPath().getFields();

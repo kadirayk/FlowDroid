@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 public class SparseAliasManager {
 
-    private static Logger log = LoggerFactory.getLogger(SparseAliasManager.class);
+    //private static Logger log = LoggerFactory.getLogger(SparseAliasManager.class);
 
     private static SparseAliasManager INSTANCE;
 
@@ -144,8 +144,8 @@ public class SparseAliasManager {
      * @return
      */
     public synchronized Set<AccessPath> getAliases(Stmt stmt, SootMethod method, Value value) {
-        log.info(method.getActiveBody().toString());
-        log.info("getAliases call for: " + stmt + " in " + method);
+//        log.info(method.getActiveBody().toString());
+//        log.info("getAliases call for: " + stmt + " in " + method);
         if (disableAliasing) {
             return Collections.emptySet();
         }
