@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import boomerang.scene.jimple.BoomerangPretransformer;
+import boomerang.scene.sparse.SparseCFGCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ import soot.jimple.infoflow.aliasing.LazyAliasingStrategy;
 import soot.jimple.infoflow.aliasing.NullAliasStrategy;
 import soot.jimple.infoflow.aliasing.PtsBasedAliasStrategy;
 import soot.jimple.infoflow.aliasing.sparse.DefaultBoomerangAliasStrategy;
+import soot.jimple.infoflow.aliasing.sparse.SparseAliasEval;
 import soot.jimple.infoflow.aliasing.sparse.TypeBasedSparseBoomerangAliasStrategy;
 import soot.jimple.infoflow.cfg.BiDirICFGFactory;
 import soot.jimple.infoflow.codeOptimization.DeadCodeEliminator;
@@ -748,6 +750,20 @@ public class Infoflow extends AbstractInfoflow {
 			logger.info(String.format("Data flow solver took %d seconds. Maximum memory consumption: %d MB",
 					performanceData.getTotalRuntimeSeconds(), performanceData.getMaxMemoryConsumption()));
 
+			SparseCFGCache.SparsificationStrategy sparsificationStrategy=null;
+			switch(config.getAliasingAlgorithm()){
+				case Boomerang:
+					sparsificationStrategy = SparseCFGCache.SparsificationStrategy.NONE;
+					break;
+				case TypeBasedSparseBoomerang:
+					sparsificationStrategy = SparseCFGCache.SparsificationStrategy.TYPE_BASED;
+					break;
+				default:
+					break;
+			}
+			SparseAliasEval sparseAliasEval = new SparseAliasEval("SimpleAlias1", sparsificationStrategy);
+			sparseAliasEval.generate();
+
 			// Provide the handler with the final results
 			for (ResultsAvailableHandler handler : onResultsAvailable)
 				handler.onResultsAvailable(iCfg, results);
@@ -968,6 +984,7 @@ public class Infoflow extends AbstractInfoflow {
 			backProblem = null;
 			backSolver = null;
 			aliasingStrategy = new DefaultBoomerangAliasStrategy(manager);
+
 			break;
 		case TypeBasedSparseBoomerang:
 			backProblem = null;
