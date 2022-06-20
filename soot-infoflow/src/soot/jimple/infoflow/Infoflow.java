@@ -47,6 +47,7 @@ import soot.jimple.infoflow.aliasing.IAliasingStrategy;
 import soot.jimple.infoflow.aliasing.LazyAliasingStrategy;
 import soot.jimple.infoflow.aliasing.NullAliasStrategy;
 import soot.jimple.infoflow.aliasing.PtsBasedAliasStrategy;
+import soot.jimple.infoflow.aliasing.sparse.AliasAwareSparseBoomerangAliasStrategy;
 import soot.jimple.infoflow.aliasing.sparse.DefaultBoomerangAliasStrategy;
 import soot.jimple.infoflow.aliasing.sparse.SparseAliasEval;
 import soot.jimple.infoflow.aliasing.sparse.TypeBasedSparseBoomerangAliasStrategy;
@@ -758,10 +759,13 @@ public class Infoflow extends AbstractInfoflow {
 				case TypeBasedSparseBoomerang:
 					sparsificationStrategy = SparseCFGCache.SparsificationStrategy.TYPE_BASED;
 					break;
+				case AliasAwareSparseBoomerang:
+					sparsificationStrategy = SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
+					break;
 				default:
 					break;
 			}
-			SparseAliasEval sparseAliasEval = new SparseAliasEval("SimpleAlias1", sparsificationStrategy);
+			SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy);
 			sparseAliasEval.generate();
 
 			// Provide the handler with the final results
@@ -984,12 +988,16 @@ public class Infoflow extends AbstractInfoflow {
 			backProblem = null;
 			backSolver = null;
 			aliasingStrategy = new DefaultBoomerangAliasStrategy(manager);
-
 			break;
 		case TypeBasedSparseBoomerang:
 			backProblem = null;
 			backSolver = null;
 			aliasingStrategy = new TypeBasedSparseBoomerangAliasStrategy(manager);
+			break;
+		case AliasAwareSparseBoomerang:
+			backProblem = null;
+			backSolver = null;
+			aliasingStrategy = new AliasAwareSparseBoomerangAliasStrategy(manager);
 			break;
 		default:
 			throw new RuntimeException("Unsupported aliasing algorithm");

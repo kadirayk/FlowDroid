@@ -48,7 +48,11 @@ public class InfoflowConfiguration {
 		/**
 		 * Use Boomerang with type-based sparsification
 		 */
-		TypeBasedSparseBoomerang
+		TypeBasedSparseBoomerang,
+		/**
+		 * Use Boomerang with alias-aware sparsification
+		 */
+		AliasAwareSparseBoomerang
 	}
 
 	/**

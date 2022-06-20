@@ -17,8 +17,8 @@ public class SparseAliasEval {
 
     private static final String OUT_PUT_DIR = "./results";
     private static final String FILE = "alias_eval.csv";
+    public static String targetProgram;
 
-    private final String targetProgram;
     private final SparseCFGCache.SparsificationStrategy sparsificationStrategy;
     private long sparseCFGBuildTime=0;
     private long cacheHitCount=0;
@@ -26,8 +26,7 @@ public class SparseAliasEval {
     private long totalAliasQueryTime=0;
     private long totalPropagationCount=0;
 
-    public SparseAliasEval(String targetProgram, SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
-        this.targetProgram = targetProgram;
+    public SparseAliasEval(SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
         this.sparsificationStrategy = sparsificationStrategy;
         handleSparseCacheData();
         handlePropagationData();
@@ -47,6 +46,7 @@ public class SparseAliasEval {
                     cacheMissCount++;
                 }
             }
+            sparseCFGBuildTime /= 1000; //total in micro to millis
         }
     }
 

@@ -29,6 +29,7 @@ import soot.jimple.infoflow.InfoflowConfiguration.LayoutMatchingMode;
 import soot.jimple.infoflow.InfoflowConfiguration.PathBuildingAlgorithm;
 import soot.jimple.infoflow.InfoflowConfiguration.PathReconstructionMode;
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode;
+import soot.jimple.infoflow.aliasing.sparse.SparseAliasEval;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration.CallbackAnalyzer;
 import soot.jimple.infoflow.android.SetupApplication;
@@ -336,7 +337,7 @@ public class MainClass {
 				// Create the data flow analyzer
 				analyzer = createFlowDroidInstance(config);
 				analyzer.setTaintWrapper(taintWrapper);
-
+				SparseAliasEval.targetProgram = apkFile.getName();
 				// Start the data flow analysis
 				analyzer.runInfoflow();
 
@@ -589,6 +590,8 @@ public class MainClass {
 			return AliasingAlgorithm.Boomerang;
 		else if (aliasAlgo.equalsIgnoreCase("TYPEBASEDSPARSEBOOMERANG"))
 			return AliasingAlgorithm.TypeBasedSparseBoomerang;
+		else if (aliasAlgo.equalsIgnoreCase("ALIASAWARESPARSEBOOMERANG"))
+			return AliasingAlgorithm.AliasAwareSparseBoomerang;
 		else {
 			System.err.println(String.format("Invalid aliasing algorithm: %s", aliasAlgo));
 			throw new AbortAnalysisException();
