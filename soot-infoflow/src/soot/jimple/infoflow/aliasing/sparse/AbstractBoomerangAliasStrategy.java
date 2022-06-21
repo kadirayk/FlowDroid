@@ -16,6 +16,7 @@ import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.aliasing.AbstractBulkAliasStrategy;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.data.AccessPathFactory;
+import soot.jimple.infoflow.data.AccessPathFragment;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -148,7 +149,7 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         aliases = aliases.stream().filter(a -> (a.getBase() instanceof JimpleVal) && !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) a.getBase()).getDelegate())).collect(Collectors.toSet());
 
 
-        SootField[] fields = newAbs.getAccessPath().getFields();
+        List<SootField> fields = Arrays.stream(newAbs.getAccessPath().getFragments()).map(AccessPathFragment::getField).collect(Collectors.toList());
         // append the fields the incoming access path had to the result set
         Set<AccessPath> aliasesWitFields = new HashSet<>();
         if (fields != null){
@@ -191,8 +192,8 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
     }
 
 
-    private AccessPath appendFields(AccessPath accessPath, SootField[] fields){
-        if(fields.length==0){
+    private AccessPath appendFields(AccessPath accessPath, List<SootField> fields){
+        if(fields.size()==0){
             return accessPath;
         }
         Collection<Field> apFields = accessPath.getFields();
