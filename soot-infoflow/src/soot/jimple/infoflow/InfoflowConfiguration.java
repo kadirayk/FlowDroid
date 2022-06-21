@@ -91,7 +91,19 @@ public class InfoflowConfiguration {
 		 * Perform lazy aliasing. Propagate every taint everywhere to on-demand check
 		 * whether it aliases with any value access
 		 */
-		Lazy
+		Lazy,
+		/**
+		 * Use Boomerang for aliasing
+		 */
+		Boomerang,
+		/**
+		 * Use Boomerang with type-based sparsification
+		 */
+		TypeBasedSparseBoomerang,
+		/**
+		 * Use Boomerang with alias-aware sparsification
+		 */
+		AliasAwareSparseBoomerang
 	}
 
 	/**
