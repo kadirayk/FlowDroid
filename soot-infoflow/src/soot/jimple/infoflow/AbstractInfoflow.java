@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import boomerang.scene.jimple.BoomerangPretransformer;
+import boomerang.scene.sparse.SparseCFGCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,7 @@ import soot.jimple.infoflow.InfoflowConfiguration.SootIntegrationMode;
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode;
 import soot.jimple.infoflow.aliasing.Aliasing;
 import soot.jimple.infoflow.aliasing.IAliasingStrategy;
+import soot.jimple.infoflow.aliasing.sparse.SparseAliasEval;
 import soot.jimple.infoflow.cfg.BiDirICFGFactory;
 import soot.jimple.infoflow.cfg.DefaultBiDiICFGFactory;
 import soot.jimple.infoflow.cfg.LibraryClassPatcher;
@@ -602,6 +605,14 @@ public abstract class AbstractInfoflow implements IInfoflow {
 			if (config.getCallgraphAlgorithm() != CallgraphAlgorithm.OnDemand)
 				logger.info("Callgraph has {} edges", Scene.v().getCallGraph().size());
 
+			// KK: added for sparse boomerang
+			if(isBoomerangActive()){
+				// Must have for Boomerang
+				BoomerangPretransformer.v().reset();
+				BoomerangPretransformer.v().apply();
+				releaseCallgraph();
+				constructCallgraph();
+			}
 			IInfoflowCFG iCfg = icfgFactory.buildBiDirICFG(config.getCallgraphAlgorithm(),
 					config.getEnableExceptionTracking());
 
@@ -613,6 +624,9 @@ public abstract class AbstractInfoflow implements IInfoflow {
 			performanceData.updateMaxMemoryConsumption(getUsedMemory());
 			logger.info(String.format("Data flow solver took %d seconds. Maximum memory consumption: %d MB",
 					performanceData.getTotalRuntimeSeconds(), performanceData.getMaxMemoryConsumption()));
+
+			// KK: added for sparse boomerang
+			handleSparseAliasEval();
 
 			// Provide the handler with the final results
 			for (ResultsAvailableHandler handler : onResultsAvailable)
@@ -630,6 +644,31 @@ public abstract class AbstractInfoflow implements IInfoflow {
 			if (throwExceptions)
 				throw ex;
 		}
+	}
+
+	private void handleSparseAliasEval() {
+		SparseCFGCache.SparsificationStrategy sparsificationStrategy=null;
+		switch(config.getAliasingAlgorithm()){
+			case Boomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.NONE;
+				break;
+			case TypeBasedSparseBoomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.TYPE_BASED;
+				break;
+			case AliasAwareSparseBoomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
+				break;
+			default:
+				break;
+		}
+		SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy);
+		sparseAliasEval.generate();
+	}
+
+	private boolean isBoomerangActive(){
+		return config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.Boomerang
+				|| config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.TypeBasedSparseBoomerang
+				|| config.getAliasingAlgorithm() == InfoflowConfiguration.AliasingAlgorithm.AliasAwareSparseBoomerang;
 	}
 
 	private void runTaintAnalysis(final ISourceSinkManager sourcesSinks, final Set<String> additionalSeeds,
