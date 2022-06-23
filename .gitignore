@@ -6,3 +6,4 @@ soot-infoflow-summaries/target/
 .idea/
 *.iml
 target/
+/results/

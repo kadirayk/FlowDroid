@@ -12,8 +12,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import soot.*;
 import soot.jimple.Stmt;
 import wpds.impl.Weight;
@@ -39,11 +37,11 @@ public class SparseAliasManager {
     private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
 
 
-    static class BoomerangOptions extends DefaultBoomerangOptions {
+    static class FlowDroidBoomerangOptions extends DefaultBoomerangOptions {
 
         private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
 
-        public BoomerangOptions(SparseCFGCache.SparsificationStrategy sparsificationStrategy){
+        public FlowDroidBoomerangOptions(SparseCFGCache.SparsificationStrategy sparsificationStrategy){
             this.sparsificationStrategy = sparsificationStrategy;
         }
 
@@ -84,6 +82,11 @@ public class SparseAliasManager {
         public boolean trackAnySubclassOfThrowable() {
             return true;
         }
+
+        @Override
+        public boolean handleSpecialInvokeAsNormalPropagation() {
+            return true;
+        }
     }
 
     private static Duration totalAliasingDuration;
@@ -119,7 +122,7 @@ public class SparseAliasManager {
                                             // TODO: stabilize null pointer exception that happens sometimes in boomerang
                                             boomerangSolver =
                                                     new Boomerang(
-                                                            sootCallGraph, dataFlowScope, new BoomerangOptions(INSTANCE.sparsificationStrategy));
+                                                            sootCallGraph, dataFlowScope, new FlowDroidBoomerangOptions(INSTANCE.sparsificationStrategy));
                                             BackwardBoomerangResults<Weight.NoWeight> results = boomerangSolver.solve(query);
                                             aliases = results.getAllAliases();
                                             boolean debug = false;
