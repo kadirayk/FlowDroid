@@ -7,6 +7,7 @@ import boomerang.scene.sparse.eval.SparseCFGQueryLog;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -58,7 +59,13 @@ public class SparseAliasEval {
     }
 
     private void handleAliasQueryTime() {
-        totalAliasQueryTime = SparseAliasManager.getTotalDuration().toMillis();
+        Duration totalDuration = SparseAliasManager.getTotalDuration();
+        if(totalDuration!=null){
+            totalAliasQueryTime = SparseAliasManager.getTotalDuration().toMillis();
+        }else{
+            totalAliasQueryTime = 0;
+        }
+
     }
 
     public void generate() {
