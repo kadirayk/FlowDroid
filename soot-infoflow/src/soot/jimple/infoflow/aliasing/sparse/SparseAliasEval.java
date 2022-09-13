@@ -36,18 +36,16 @@ public class SparseAliasEval {
 
     private void handleSparseCacheData() {
         if(sparsificationStrategy!= SparseCFGCache.SparsificationStrategy.NONE){
-            SparseCFGCache cache = SparseCFGCache.getInstance(sparsificationStrategy);
+            SparseCFGCache cache = SparseCFGCache.getInstance(sparsificationStrategy, true);
             List<SparseCFGQueryLog> queryLogs = cache.getQueryLogs();
-
             for (SparseCFGQueryLog queryLog : queryLogs) {
-                sparseCFGBuildTime += queryLog.getDuration();
+                sparseCFGBuildTime += queryLog.getDuration().toMillis();
                 if (queryLog.isRetrievedFromCache()) {
                     cacheHitCount++;
                 } else {
                     cacheMissCount++;
                 }
             }
-            sparseCFGBuildTime /= 1000; //total in micro to millis
         }
     }
 
