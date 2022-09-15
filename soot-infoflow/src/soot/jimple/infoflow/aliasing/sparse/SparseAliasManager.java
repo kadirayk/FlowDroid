@@ -35,14 +35,17 @@ public class SparseAliasManager {
 
     private boolean disableAliasing = false;
     private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
+    private boolean ignoreAfterQuery;
 
 
     static class FlowDroidBoomerangOptions extends DefaultBoomerangOptions {
 
         private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
+        private boolean ignoreAfterQuery;
 
-        public FlowDroidBoomerangOptions(SparseCFGCache.SparsificationStrategy sparsificationStrategy){
+        public FlowDroidBoomerangOptions(SparseCFGCache.SparsificationStrategy sparsificationStrategy, boolean ignoreAfterQuery){
             this.sparsificationStrategy = sparsificationStrategy;
+            this.ignoreAfterQuery = ignoreAfterQuery;
         }
 
         @Override
@@ -51,6 +54,11 @@ public class SparseAliasManager {
                 return SparseCFGCache.SparsificationStrategy.NONE;
             }
             return this.sparsificationStrategy;
+        }
+
+        @Override
+        public boolean ignoreSparsificationAfterQuery() {
+            return this.ignoreAfterQuery;
         }
 
         @Override
@@ -91,8 +99,9 @@ public class SparseAliasManager {
 
     private static Duration totalAliasingDuration;
 
-    private SparseAliasManager(SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
+    private SparseAliasManager(SparseCFGCache.SparsificationStrategy sparsificationStrategy, boolean ignoreAfterQuery) {
         this.sparsificationStrategy = sparsificationStrategy;
+        this.ignoreAfterQuery = ignoreAfterQuery;
         totalAliasingDuration = Duration.ZERO;
         sootCallGraph = new SootCallGraph();
         dataFlowScope = SootDataFlowScope.make(Scene.v());
@@ -103,9 +112,9 @@ public class SparseAliasManager {
         return totalAliasingDuration;
     }
 
-    public static synchronized SparseAliasManager getInstance(SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
-        if (INSTANCE == null || INSTANCE.sparsificationStrategy!=sparsificationStrategy) {
-            INSTANCE = new SparseAliasManager(sparsificationStrategy);
+    public static synchronized SparseAliasManager getInstance(SparseCFGCache.SparsificationStrategy sparsificationStrategy, boolean ignoreAfterQuery) {
+        if (INSTANCE == null || INSTANCE.sparsificationStrategy!=sparsificationStrategy || INSTANCE.ignoreAfterQuery!=ignoreAfterQuery) {
+            INSTANCE = new SparseAliasManager(sparsificationStrategy, ignoreAfterQuery);
         }
         return INSTANCE;
     }
@@ -122,7 +131,7 @@ public class SparseAliasManager {
                                             // TODO: stabilize null pointer exception that happens sometimes in boomerang
                                             boomerangSolver =
                                                     new Boomerang(
-                                                            sootCallGraph, dataFlowScope, new FlowDroidBoomerangOptions(INSTANCE.sparsificationStrategy));
+                                                            sootCallGraph, dataFlowScope, new FlowDroidBoomerangOptions(INSTANCE.sparsificationStrategy, INSTANCE.ignoreAfterQuery));
                                             BackwardBoomerangResults<Weight.NoWeight> results = boomerangSolver.solve(query);
                                             aliases = results.getAllAliases();
                                             boolean debug = false;
