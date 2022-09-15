@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import heros.solver.Pair;
 import soot.*;
+import soot.jimple.Jimple;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.aliasing.AbstractBulkAliasStrategy;
@@ -271,7 +272,15 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         AccessPathFactory accessPathFactory = new AccessPathFactory(manager.getConfig());
         Value base = ((JimpleVal) boomerangAP.getBase()).getDelegate();
         Collection<Field> fields = boomerangAP.getFields();
-        List<SootField> sootFieldList = fields.stream().map(e->((JimpleField) e).getSootField()).collect(Collectors.toList());
+
+        List<SootField> sootFieldList = new ArrayList<>();
+        for (Field field : fields) {
+            if(field instanceof JimpleField){
+                sootFieldList.add(((JimpleField) field).getSootField());
+            }
+        }
+
+        //List<SootField> sootFieldList = fields.stream().filter(e->e instanceof JimpleField).map(e->((JimpleField) e).getSootField()).collect(Collectors.toList());
 /*        for(Iterator<Field> iter = fields.iterator(); iter.hasNext();){
             Field next = iter.next();
             SootField sootField = ((JimpleField) next).getSootField();
