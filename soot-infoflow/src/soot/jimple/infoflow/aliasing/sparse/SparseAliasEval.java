@@ -3,6 +3,7 @@ package soot.jimple.infoflow.aliasing.sparse;
 import boomerang.scene.sparse.SparseCFGCache;
 import boomerang.scene.sparse.eval.PropagationCounter;
 import boomerang.scene.sparse.eval.SparseCFGQueryLog;
+import soot.jimple.infoflow.results.InfoflowPerformanceData;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,10 +26,12 @@ public class SparseAliasEval {
     private long cacheHitCount=0;
     private long cacheMissCount=0;
     private long totalAliasQueryTime=0;
-    private long totalPropagationCount=0;
+    private long totalAliasQueryPropagationCount =0;
+    private InfoflowPerformanceData performanceData;
 
-    public SparseAliasEval(SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
+    public SparseAliasEval(SparseCFGCache.SparsificationStrategy sparsificationStrategy, InfoflowPerformanceData performanceData) {
         this.sparsificationStrategy = sparsificationStrategy;
+        this.performanceData = performanceData;
         handleSparseCacheData();
         handlePropagationData();
         handleAliasQueryTime();
@@ -53,7 +56,7 @@ public class SparseAliasEval {
         PropagationCounter counter = PropagationCounter.getInstance(sparsificationStrategy);
         long fwd = counter.getForwardPropagation();
         long bwd = counter.getBackwardPropagation();
-        totalPropagationCount = fwd + bwd;
+        totalAliasQueryPropagationCount = fwd + bwd;
     }
 
     private void handleAliasQueryTime() {
@@ -83,11 +86,21 @@ public class SparseAliasEval {
                 str.append(",");
                 str.append("sparseCFGBuildTime");
                 str.append(",");
-                str.append("totalPropagationCount");
+                str.append("totalAliasQueryPropagationCount");
                 str.append(",");
                 str.append("cacheHitCount");
                 str.append(",");
                 str.append("cacheMissCount");
+                str.append(",");
+                str.append("totalAnalysisTime");
+                str.append(",");
+                str.append("maxMemory");
+                str.append(",");
+                str.append("sourceCount");
+                str.append(",");
+                str.append("sinkCount");
+                str.append(",");
+                str.append("edgeCount");
                 str.append(System.lineSeparator());
                 writer.write(str.toString());
             } catch (IOException e) {
@@ -104,11 +117,21 @@ public class SparseAliasEval {
             str.append(",");
             str.append(sparseCFGBuildTime);
             str.append(",");
-            str.append(totalPropagationCount);
+            str.append(totalAliasQueryPropagationCount);
             str.append(",");
             str.append(cacheHitCount);
             str.append(",");
             str.append(cacheMissCount);
+            str.append(",");
+            str.append(performanceData.getTotalRuntimeSeconds());
+            str.append(",");
+            str.append(performanceData.getMaxMemoryConsumption());
+            str.append(",");
+            str.append(performanceData.getSourceCount());
+            str.append(",");
+            str.append(performanceData.getSinkCount());
+            str.append(",");
+            str.append(performanceData.getEdgePropagationCount());
             str.append(System.lineSeparator());
             writer.write(str.toString());
         } catch (IOException e) {

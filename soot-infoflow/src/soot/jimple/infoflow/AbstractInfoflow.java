@@ -626,7 +626,7 @@ public abstract class AbstractInfoflow implements IInfoflow {
 					performanceData.getTotalRuntimeSeconds(), performanceData.getMaxMemoryConsumption()));
 
 			// KK: added for sparse boomerang
-			handleSparseAliasEval();
+			handleSparseAliasEval(performanceData);
 
 			// Provide the handler with the final results
 			for (ResultsAvailableHandler handler : onResultsAvailable)
@@ -646,7 +646,7 @@ public abstract class AbstractInfoflow implements IInfoflow {
 		}
 	}
 
-	private void handleSparseAliasEval() {
+	private void handleSparseAliasEval(InfoflowPerformanceData performanceData) {
 		SparseCFGCache.SparsificationStrategy sparsificationStrategy=null;
 		switch(config.getAliasingAlgorithm()){
 			case Boomerang:
@@ -661,7 +661,7 @@ public abstract class AbstractInfoflow implements IInfoflow {
 			default:
 				break;
 		}
-		SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy);
+		SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy, performanceData);
 		sparseAliasEval.generate();
 	}
 
