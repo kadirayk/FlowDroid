@@ -60,9 +60,9 @@ public class SparseAliasEval {
     }
 
     private void handleAliasQueryTime() {
-        Duration totalDuration = SparseAliasManager.getTotalDuration();
+        Duration totalDuration = SparseAliasManager.getInstance(sparsificationStrategy).getTotalDuration();
         if(totalDuration!=null){
-            totalAliasQueryTime = SparseAliasManager.getTotalDuration().toMillis();
+            totalAliasQueryTime = SparseAliasManager.getInstance(sparsificationStrategy).getTotalDuration().toMillis();
         }else{
             totalAliasQueryTime = 0;
         }

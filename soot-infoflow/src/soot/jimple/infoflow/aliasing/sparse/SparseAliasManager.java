@@ -89,7 +89,7 @@ public class SparseAliasManager {
         }
     }
 
-    private static Duration totalAliasingDuration;
+    private Duration totalAliasingDuration;
 
     private SparseAliasManager(SparseCFGCache.SparsificationStrategy sparsificationStrategy) {
         this.sparsificationStrategy = sparsificationStrategy;
@@ -99,7 +99,7 @@ public class SparseAliasManager {
         setupQueryCache();
     }
 
-    public static Duration getTotalDuration() {
+    public Duration getTotalDuration() {
         return totalAliasingDuration;
     }
 
