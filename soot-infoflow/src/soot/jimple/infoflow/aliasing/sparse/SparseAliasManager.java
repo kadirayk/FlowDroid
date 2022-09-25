@@ -12,6 +12,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Ordering;
 import soot.*;
 import soot.jimple.Stmt;
 import wpds.impl.Weight;
@@ -19,6 +21,7 @@ import wpds.impl.Weight;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class SparseAliasManager {
 
@@ -35,6 +38,8 @@ public class SparseAliasManager {
 
     private boolean disableAliasing = false;
     private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
+    private Map<String, Set<AccessPath>> queryMap = new HashMap<>(); //new ImmutableSortedMap.Builder<String, Set<AccessPath>>(Ordering.natural()).build();
+    private Map<String, Integer> queryCount = new HashMap<>(); // new ImmutableSortedMap.Builder<String, Integer>(Ordering.natural()).build();
 
 
     static class FlowDroidBoomerangOptions extends DefaultBoomerangOptions {
@@ -157,7 +162,23 @@ public class SparseAliasManager {
         Set<AccessPath> aliases = getAliases(query);
         Duration elapsed = stopwatch.elapsed();
         totalAliasingDuration = totalAliasingDuration.plus(elapsed);
+        String queryKey = value.toString() + "-" + stmt.toString() + "-" + method.getSignature().toString();
+        queryMap.put(queryKey, aliases);
+        if(!queryCount.containsKey(queryKey)){
+            queryCount.put(queryKey, 1);
+        }else{
+            Integer count = queryCount.get(queryKey);
+            queryCount.put(queryKey, count+1);
+        }
         return aliases;
+    }
+
+    public long getQueryCount(){
+        long count=0;
+        for (int i : queryCount.values()) {
+            count+=i;
+        }
+        return count;
     }
 
     private BackwardQuery createQuery(Stmt stmt, SootMethod method, Value value) {

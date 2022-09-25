@@ -10,6 +10,7 @@
  ******************************************************************************/
 package soot.jimple.infoflow.android;
 
+import boomerang.scene.sparse.SparseCFGCache;
 import heros.solver.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import soot.*;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.*;
 import soot.jimple.infoflow.InfoflowConfiguration.SootIntegrationMode;
+import soot.jimple.infoflow.aliasing.sparse.SparseAliasEval;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration.CallbackConfiguration;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration.IccConfiguration;
 import soot.jimple.infoflow.android.callbacks.AbstractCallbackAnalyzer;
@@ -1595,6 +1597,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 			}
 		}
 
+
 		// We don't need the computed callbacks anymore
 		this.callbackMethods.clear();
 		this.fragmentClasses.clear();
@@ -1602,6 +1605,34 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 		// Notify our result handlers
 		for (ResultsAvailableHandler handler : resultsAvailableHandlers)
 			handler.onResultsAvailable(resultAggregator.getLastICFG(), resultAggregator.getLastResults());
+
+		// KK: added for sparse boomerang
+		InfoflowResults lastResults = resultAggregator.getLastResults();
+		if(lastResults!=null){
+			int leaks = resultAggregator.getLastResults().size();
+			InfoflowPerformanceData perfData = resultAggregator.getLastResults().getPerformanceData();
+			handleSparseAliasEval(perfData, leaks);
+		}
+	}
+
+
+	private void handleSparseAliasEval(InfoflowPerformanceData performanceData, int leaks) {
+		SparseCFGCache.SparsificationStrategy sparsificationStrategy=null;
+		switch(config.getAliasingAlgorithm()){
+			case Boomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.NONE;
+				break;
+			case TypeBasedSparseBoomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.TYPE_BASED;
+				break;
+			case AliasAwareSparseBoomerang:
+				sparsificationStrategy = SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
+				break;
+			default:
+				break;
+		}
+		SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy, performanceData, leaks);
+		sparseAliasEval.generate();
 	}
 
 	/**

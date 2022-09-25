@@ -26,6 +26,10 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Extended from: https://github.com/johspaeth/boomerang-artifact/blob/master/soot-infoflow-alias/src/soot/jimple/infoflow/aliasing/BoomerangAliasStrategy.java
+ *
+ */
 public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasStrategy {
 
     private IInfoflowCFG icfg;
@@ -67,15 +71,15 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
 
         // There are two different queries necessary: At field writes and at method return statements,
         // when there might be new alias in the caller scope.
-//        if (src.containsInvokeExpr()) {
-//            handleReturn(d1, src, taintSet, newAbs, base);
-//        } else {
+        if (src.containsInvokeExpr()) {
+            handleReturn(d1, src, taintSet, newAbs, base);
+        } else {
             handleFieldWrite(d1, src, taintSet, newAbs, base);
-//        }
+        }
     }
 
 
-    private void handleReturn(Abstraction d1, Stmt src, Set<Abstraction> taintSet, Abstraction newAbs, Local base) {
+    private synchronized void handleReturn(Abstraction d1, Stmt src, Set<Abstraction> taintSet, Abstraction newAbs, Local base) {
         SootMethod method = icfg.getMethodOf(src);
         // Upon return, the last field access is dropped from the abstraction and a query is triggered
         // for this access graph. Then for each of the result, the last field is re-appended and those
@@ -97,7 +101,10 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         }
         Set<Abstraction> fwaps = new HashSet<>();
         for (AccessPath ap : aps) {
-            fwaps.add(toFlowDroidAcessPath(ap, src, newAbs));
+            Abstraction ab = toFlowDroidAcessPath(ap, src, newAbs);
+            if(ab!=null){
+                fwaps.add(ab);
+            }
         }
         taintSet.addAll(fwaps);
     }
@@ -231,7 +238,6 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
                 taintSet.add(flowDroidAP);
             }
         }
-
     }
 
     /**
