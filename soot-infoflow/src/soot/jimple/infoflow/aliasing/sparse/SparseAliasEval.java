@@ -82,6 +82,8 @@ public class SparseAliasEval {
                 str.append("qCount");
                 str.append(",");
                 str.append("degree");
+                str.append(",");
+                str.append("src");
                 str.append(System.lineSeparator());
                 writer.write(str.toString());
             } catch (IOException e) {
@@ -105,6 +107,8 @@ public class SparseAliasEval {
             str.append(aliasQueryCount);
             str.append(",");
             str.append(degreeOfSparsification());
+            str.append(",");
+            str.append(performanceData.getSourceCount());
             str.append(System.lineSeparator());
             writer.write(str.toString());
         } catch (IOException e) {

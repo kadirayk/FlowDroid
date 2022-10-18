@@ -242,7 +242,7 @@ public abstract class AbstractComponentEntryPointCreator extends AbstractAndroid
 					try {
 						assignIntent(component, stmt.getInvokeExpr().getMethod(), i);
 					} catch (Exception ex) {
-						logger.error("Assign Intent for " + stmt.getInvokeExpr().getMethod() + " fails.", ex);
+						logger.debug("Assign Intent for " + stmt.getInvokeExpr().getMethod() + " fails.", ex);
 					}
 				}
 			}
