@@ -689,7 +689,8 @@ public class InfoflowProblem extends AbstractInfoflowProblem {
 							}
 						}
 
-						for (Abstraction abs : res) {
+						Set<Abstraction> absCopy = new HashSet<>(res);
+						for (Abstraction abs : absCopy) {
 							// Aliases of implicitly tainted variables must be
 							// mapped back into the caller's context on return
 							// when we leave the last implicitly-called method

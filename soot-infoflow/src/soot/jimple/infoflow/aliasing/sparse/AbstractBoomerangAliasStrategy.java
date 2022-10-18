@@ -248,10 +248,13 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
      * @return
      */
     private Set<AccessPath> removeRedundantAlias(Abstraction newAbs, Set<AccessPath> aliases) {
-        return aliases.stream()
-                .filter(a -> (a.getBase() instanceof JimpleVal)
-                        && !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) a.getBase()).getDelegate()))
-                .collect(Collectors.toSet());
+        Set<AccessPath> removed = new HashSet<>();
+        for (AccessPath alias : aliases) {
+            if(alias.getBase() instanceof JimpleVal && !newAbs.getAccessPath().getPlainValue().equals(((JimpleVal) alias.getBase()).getDelegate())){
+                removed.add(alias);
+            }
+        }
+        return removed;
     }
 
     private List<SootField> getFields(Abstraction newAbs) {
@@ -274,7 +277,7 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
      * @param newAbs
      * @return
      */
-    private synchronized Abstraction toFlowDroidAcessPath(AccessPath boomerangAP, Stmt src, Abstraction newAbs) {
+    private Abstraction toFlowDroidAcessPath(AccessPath boomerangAP, Stmt src, Abstraction newAbs) {
         AccessPathFactory accessPathFactory = new AccessPathFactory(manager.getConfig());
         Value base = ((JimpleVal) boomerangAP.getBase()).getDelegate();
         Collection<Field> fields = boomerangAP.getFields();

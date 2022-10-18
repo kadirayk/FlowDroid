@@ -1631,9 +1631,10 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 			default:
 				break;
 		}
-		SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy, performanceData, leaks);
-		sparseAliasEval.generate();
-	}
+		if(sparsificationStrategy!=null){ // i.e. SparseBoomerang not used
+			SparseAliasEval sparseAliasEval = new SparseAliasEval(sparsificationStrategy, performanceData);
+			sparseAliasEval.generate();
+		}
 
 	/**
 	 * Writes the given data flow results into the configured output file
