@@ -1636,6 +1636,8 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 			sparseAliasEval.generate();
 		}
 
+	}
+
 	/**
 	 * Writes the given data flow results into the configured output file
 	 * 

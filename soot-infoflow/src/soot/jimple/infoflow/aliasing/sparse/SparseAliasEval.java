@@ -67,19 +67,19 @@ public class SparseAliasEval {
         if(!file.exists()){
             try (FileWriter writer = new FileWriter(file)) {
                 StringBuilder str = new StringBuilder();
-                str.append("targetProgram");
+                str.append("apk");
                 str.append(",");
-                str.append("sparsificationStrategy");
+                str.append("strategy");
                 str.append(",");
-                str.append("totalAliasQueryTime");
+                str.append("qTime");
                 str.append(",");
-                str.append("sparseCFGBuildTime");
+                str.append("SCFG");
                 str.append(",");
-                str.append("totalAnalysisTime");
+                str.append("runtime");
                 str.append(",");
-                str.append("aliasQueryCount");
+                str.append("qCount");
                 str.append(",");
-                str.append("degreeOfSpars");
+                str.append("degree");
                 str.append(System.lineSeparator());
                 writer.write(str.toString());
             } catch (IOException e) {
