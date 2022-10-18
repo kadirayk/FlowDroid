@@ -77,6 +77,8 @@ public class SparseAliasEval {
                 str.append(",");
                 str.append("runtime");
                 str.append(",");
+                str.append("mem");
+                str.append(",");
                 str.append("qCount");
                 str.append(",");
                 str.append("degree");
