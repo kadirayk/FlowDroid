@@ -23,7 +23,8 @@ public class SparseAliasEval {
     private final SparseCFGCache.SparsificationStrategy sparsificationStrategy;
     private long sparseCFGBuildTime=0;
     private long totalAliasQueryTime=0;
-    private long aliasQueryCount = 0;
+    private long aliasQueryCount = 0; // issued by the client
+    private long scfgBuildCount = 0; // client queries + internal queries that lead to SCFG construction, i.e. not retrieved from cache
     private InfoflowPerformanceData performanceData;
     private float initalStmtCount = 0;
     private float finalStmtCount = 0;
@@ -42,8 +43,11 @@ public class SparseAliasEval {
             List<SparseCFGQueryLog> queryLogs = cache.getQueryLogs();
             for (SparseCFGQueryLog queryLog : queryLogs) {
                 sparseCFGBuildTime += queryLog.getDuration().toMillis();
-                initalStmtCount += queryLog.getInitialStmtCount();
-                finalStmtCount += queryLog.getFinalStmtCount();
+                if(queryLog.getInitialStmtCount()>0 && queryLog.getFinalStmtCount()>0){
+                    initalStmtCount += queryLog.getInitialStmtCount();
+                    finalStmtCount += queryLog.getFinalStmtCount();
+                    scfgBuildCount++;
+                }
             }
         }
     }
@@ -81,9 +85,11 @@ public class SparseAliasEval {
                 str.append(",");
                 str.append("qCount");
                 str.append(",");
-                str.append("degree");
+                str.append("DoS");
                 str.append(",");
                 str.append("src");
+                str.append(",");
+                str.append("tqCount");
                 str.append(System.lineSeparator());
                 writer.write(str.toString());
             } catch (IOException e) {
@@ -109,6 +115,8 @@ public class SparseAliasEval {
             str.append(degreeOfSparsification());
             str.append(",");
             str.append(performanceData.getSourceCount());
+            str.append(",");
+            str.append(scfgBuildCount);
             str.append(System.lineSeparator());
             writer.write(str.toString());
         } catch (IOException e) {
@@ -118,7 +126,7 @@ public class SparseAliasEval {
 
     private String degreeOfSparsification(){
         if(finalStmtCount!=0){
-            return String.format("%.2f",initalStmtCount/finalStmtCount);
+            return String.format("%.2f",(initalStmtCount-finalStmtCount)/initalStmtCount);
         }
         return "0";
     }

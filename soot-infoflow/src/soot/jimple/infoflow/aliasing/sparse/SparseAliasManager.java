@@ -12,8 +12,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Ordering;
 import soot.*;
 import soot.jimple.Stmt;
 import wpds.impl.Weight;
@@ -21,7 +19,6 @@ import wpds.impl.Weight;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class SparseAliasManager {
 
@@ -38,7 +35,8 @@ public class SparseAliasManager {
 
     private boolean disableAliasing = false;
     private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
-    private Map<String, Set<AccessPath>> queryMap = new HashMap<>(); //new ImmutableSortedMap.Builder<String, Set<AccessPath>>(Ordering.natural()).build();
+    private boolean useQueryCache = true;
+    //private Map<String, Set<AccessPath>> queryMap = new HashMap<>(); //new ImmutableSortedMap.Builder<String, Set<AccessPath>>(Ordering.natural()).build();
     private Map<String, Integer> queryCount = new HashMap<>(); // new ImmutableSortedMap.Builder<String, Integer>(Ordering.natural()).build();
 
 
@@ -101,7 +99,9 @@ public class SparseAliasManager {
         totalAliasingDuration = Duration.ZERO;
         sootCallGraph = new SootCallGraph();
         dataFlowScope = SootDataFlowScope.make(Scene.v());
-        setupQueryCache();
+        if(this.useQueryCache){
+            setupQueryCache();
+        }
     }
 
     public Duration getTotalDuration() {
@@ -124,19 +124,7 @@ public class SparseAliasManager {
                                     public Set<AccessPath> load(BackwardQuery query) throws Exception {
                                         Set<AccessPath> aliases = queryCache.getIfPresent(query);
                                         if (aliases == null) {
-                                            // TODO: stabilize null pointer exception that happens sometimes in boomerang
-                                            boomerangSolver =
-                                                    new Boomerang(
-                                                            sootCallGraph, dataFlowScope, new FlowDroidBoomerangOptions(INSTANCE.sparsificationStrategy));
-                                            BackwardBoomerangResults<Weight.NoWeight> results = boomerangSolver.solve(query);
-                                            aliases = results.getAllAliases();
-                                            boolean debug = false;
-                                            if (debug) {
-                                                System.out.println(query);
-                                                System.out.println("alloc:" + results.getAllocationSites());
-                                                System.out.println("aliases:" + aliases);
-                                            }//boomerangSolver.unregisterAllListeners();
-                                            //boomerangSolver.unregisterAllListeners();
+                                            aliases = doBoomerangQuery(query);
                                             queryCache.put(query, aliases);
                                         }
                                         return aliases;
@@ -162,15 +150,17 @@ public class SparseAliasManager {
         Set<AccessPath> aliases = getAliases(query);
         Duration elapsed = stopwatch.elapsed();
         totalAliasingDuration = totalAliasingDuration.plus(elapsed);
-        String queryKey = value.toString() + "-" + stmt.toString() + "-" + method.getSignature().toString();
-        queryMap.put(queryKey, aliases);
+        return aliases;
+    }
+
+    private void countQuery(BackwardQuery query) {
+        String queryKey = query.toString();
         if(!queryCount.containsKey(queryKey)){
             queryCount.put(queryKey, 1);
         }else{
             Integer count = queryCount.get(queryKey);
             queryCount.put(queryKey, count+1);
         }
-        return aliases;
     }
 
     public long getQueryCount(){
@@ -192,13 +182,26 @@ public class SparseAliasManager {
             throw new RuntimeException("No successors for: " + statement);
     }
 
+    private Set<AccessPath> doBoomerangQuery(BackwardQuery query){
+        countQuery(query);
+        boomerangSolver =
+                new Boomerang(
+                        sootCallGraph, dataFlowScope, new FlowDroidBoomerangOptions(INSTANCE.sparsificationStrategy));
+        BackwardBoomerangResults<Weight.NoWeight> results = boomerangSolver.solve(query);
+        return results.getAllAliases();
+    }
+
     private Set<AccessPath> getAliases(BackwardQuery query) {
-        try {
-            return queryCache.get(query);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        if(useQueryCache){
+            try {
+                return queryCache.get(query);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            return Collections.emptySet();
+        }else{
+            return doBoomerangQuery(query);
         }
-        return Collections.emptySet();
     }
 
 }
