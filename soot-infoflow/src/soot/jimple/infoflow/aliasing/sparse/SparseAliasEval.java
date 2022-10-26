@@ -89,7 +89,7 @@ public class SparseAliasEval {
                 str.append(",");
                 str.append("src");
                 str.append(",");
-                str.append("tqCount");
+                str.append("SCFGCount");
                 str.append(System.lineSeparator());
                 writer.write(str.toString());
             } catch (IOException e) {
