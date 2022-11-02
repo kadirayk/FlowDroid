@@ -35,7 +35,7 @@ public class SparseAliasManager {
 
     private boolean disableAliasing = false;
     private SparseCFGCache.SparsificationStrategy sparsificationStrategy;
-    private boolean useQueryCache = false; // to enable/disable caching in the client itself.
+    private boolean useQueryCache = true; // to enable/disable caching in the client itself.
     //private Map<String, Set<AccessPath>> queryMap = new HashMap<>(); //new ImmutableSortedMap.Builder<String, Set<AccessPath>>(Ordering.natural()).build();
     private Map<String, Integer> queryCount = new HashMap<>(); // new ImmutableSortedMap.Builder<String, Integer>(Ordering.natural()).build();
 
