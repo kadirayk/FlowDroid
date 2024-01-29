@@ -94,6 +94,7 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         List<SootField> fields = getFields(newAbs);
         SparseAliasManager aliasManager = getSparseAliasManager();
         Set<AccessPath> aliases = aliasManager.getAliases(src, method, base);
+
         aliases = removeRedundantAlias(newAbs, aliases);
         Set<AccessPath> aps = new HashSet<>();
         for (AccessPath ap : aliases) {
@@ -108,87 +109,6 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
         }
         taintSet.addAll(fwaps);
     }
-
-//    private Set<AccessPath> popLastField(AccessPath accessPath, SootField initialLastField) {
-//        Set<AccessPath> accessPaths = new HashSet<>();
-//        if (!accessPath.isOverApproximated()) { // if it is not a set
-//            Collection<Field> fields = accessPath.getFields();
-//            Field lastField = null;
-//            if (fields != null && !fields.isEmpty()) {
-//                for (Field field : fields) {
-//                    lastField = field;
-//                }
-//            }
-//            if (lastField != null) {
-//                fields.remove(lastField);
-//            }
-//            AccessPath withoutLastField = new AccessPath(accessPath.getBase(), fields);
-//            accessPaths.add(withoutLastField);
-//        } else { // it it is a set then don't remove the last field but return all fields
-//            Collection<Field> fields = accessPath.getFields();
-//            for (Field field : fields) {
-//                if (field instanceof JimpleField) {
-//                    JimpleField jField = (JimpleField) field;
-//                    SootField sootField = jField.getSootField();
-//                    if (sootField.equals(initialLastField)) {
-//                        continue;
-//                    }
-//                    AccessPath ap = new AccessPath(accessPath.getBase(), field);
-//                    accessPaths.add(ap);
-//                }
-//            }
-//        }
-//        return accessPaths;
-//    }
-
-
-//    private void handleReturn(Abstraction d1, Stmt src, Set<Abstraction> taintSet,
-//                              Abstraction newAbs, Local base) {
-//
-//        // Upon return, the last field access is dropped from the abstraction and a query is triggered
-//        // for this access graph. Then for each of the result, the last field is re-appended and those
-//        // access paths are propagated forward
-//        SootField lastField = newAbs.getAccessPath().getLastField();
-//        if (newAbs.getAccessPath().getLastFieldType() instanceof ArrayType) {
-//
-//            // Special handling for arrays
-//            SootField[] fields = newAbs.getAccessPath().getFields();
-//            AccessGraph accessPath = new AccessGraph(base, base.getType(), toListFieldWithStmt(fields));
-//            SootMethod method = boomerang.context.icfg.getMethodOf(src);
-//
-//            AliasResults res = queryBoomerang(accessPath, src, method, d1);
-//            Set<AccessGraph> accessPathOnly = res.mayAliasSet();
-//
-//            for (AccessGraph ap : accessPathOnly) {
-//                taintSet.add(toFlowDroidAccessPath(ap, src, newAbs));
-//            }
-//            return;
-//        }
-//        if (lastField == null)
-//            return;
-//        if (d1.equals(newAbs))
-//            return;
-//        SootField[] fields = newAbs.getAccessPath().getFields();
-//        AccessGraph accessPath = new AccessGraph(base, base.getType(), toListFieldWithStmt(fields));
-//        Set<AccessGraph> withoutLastFields = accessPath.popLastField();
-//        SootMethod method = icfg.getMethodOf(src);
-//        for (AccessGraph withoutLastField : withoutLastFields) {
-//            // trigger query for access graph with droped/popped last field.
-//            AliasResults res = queryBoomerang(withoutLastField, src, method, d1);
-//            Set<AccessGraph> accessPathOnly = res.mayAliasSet();
-//            if (lastField != null)
-//                // add the last field again.
-//                accessPathOnly =
-//                        AliasResults.appendField(accessPathOnly,
-//                                new WrappedSootField(lastField, lastField.getType(), null), boomerang.context);
-//
-//            for (AccessGraph ap : accessPathOnly) {
-//                Abstraction flowDroidAccessPath = toFlowDroidAccessPath(ap, src, newAbs);
-//                if (flowDroidAccessPath != null)
-//                    taintSet.add(flowDroidAccessPath);
-//            }
-//        }
-//    }
 
     private Collection<Field> toJimpleFields(List<SootField> fields) {
         List<Field> jimpleFields = new ArrayList<>();
@@ -289,13 +209,6 @@ public abstract class AbstractBoomerangAliasStrategy extends AbstractBulkAliasSt
             }
         }
 
-        //List<SootField> sootFieldList = fields.stream().filter(e->e instanceof JimpleField).map(e->((JimpleField) e).getSootField()).collect(Collectors.toList());
-/*        for(Iterator<Field> iter = fields.iterator(); iter.hasNext();){
-            Field next = iter.next();
-            SootField sootField = ((JimpleField) next).getSootField();
-            sootFieldList.add(sootField);
-        }
-*/
         soot.jimple.infoflow.data.AccessPath flowDroidAP = accessPathFactory.createAccessPath(base, sootFieldList.toArray(new SootField[sootFieldList.size()]), true);
         return newAbs.deriveNewAbstraction(flowDroidAP, src);
     }

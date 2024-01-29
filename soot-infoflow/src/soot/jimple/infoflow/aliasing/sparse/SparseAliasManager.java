@@ -23,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 public class SparseAliasManager {
 
     //private static Logger log = LoggerFactory.getLogger(SparseAliasManager.class);
-
     private static SparseAliasManager INSTANCE;
 
     private LoadingCache<BackwardQuery, Set<AccessPath>> queryCache;
@@ -149,6 +148,7 @@ public class SparseAliasManager {
         BackwardQuery query = createQuery(stmt, method, value);
         Set<AccessPath> aliases = getAliases(query);
         Duration elapsed = stopwatch.elapsed();
+
         totalAliasingDuration = totalAliasingDuration.plus(elapsed);
         return aliases;
     }
